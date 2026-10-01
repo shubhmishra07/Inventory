@@ -1,0 +1,213 @@
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="material-icons-round">inventory_2</span>
+      <h1>Retail Inventory</h1>
+    </div>
+    
+    <nav class="nav-menu">
+      <a *ngFor="let tab of tabs" 
+         [class.active]="activeTab === tab"
+         (click)="setTab(tab)"
+         href="javascript:void(0)">
+        <span class="material-icons-round">
+          {{ tab === 'Dashboard' ? 'dashboard' :
+             tab === 'Products' ? 'category' : 
+             tab === 'Warehouses' ? 'warehouse' : 
+             tab === 'Suppliers' ? 'local_shipping' : 
+             tab === 'Orders' ? 'shopping_cart' : 
+             tab === 'OrderItems' ? 'receipt_long' : 'inventory' }}
+        </span>
+        {{ tab }}
+      </a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-container">
+      
+      <div class="header">
+        <h2>{{ activeTab === 'Dashboard' ? 'Overview' : activeTab + ' Management' }}</h2>
+        <button class="btn-primary" *ngIf="activeTab !== 'Dashboard'" (click)="openCreateModal()">
+          <span class="material-icons-round">add</span>
+          New {{ activeTab | slice:0:-1 }}
+        </button>
+      </div>
+
+      <!-- Dashboard View -->
+      <div class="dashboard-grid" *ngIf="activeTab === 'Dashboard'">
+        <div class="stat-card">
+          <div class="stat-icon text-blue">
+            <span class="material-icons-round">category</span>
+          </div>
+          <div class="stat-details">
+            <h3>Products</h3>
+            <p>{{ dashboardStats.products }}</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon text-green">
+            <span class="material-icons-round">warehouse</span>
+          </div>
+          <div class="stat-details">
+            <h3>Warehouses</h3>
+            <p>{{ dashboardStats.warehouses }}</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon text-orange">
+            <span class="material-icons-round">local_shipping</span>
+          </div>
+          <div class="stat-details">
+            <h3>Suppliers</h3>
+            <p>{{ dashboardStats.suppliers }}</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon text-purple">
+            <span class="material-icons-round">shopping_cart</span>
+          </div>
+          <div class="stat-details">
+            <h3>Orders</h3>
+            <p>{{ dashboardStats.orders }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table View -->
+      <div class="card" *ngIf="activeTab !== 'Dashboard'">
+        <table class="data-table" *ngIf="items.length > 0; else emptyState">
+          <thead>
+            <tr>
+              <th *ngFor="let key of keys">{{ key }}</th>
+              <th style="width: 120px">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of items">
+              <td *ngFor="let key of keys">{{ item[key] }}</td>
+              <td>
+                <button class="btn-icon text-blue" (click)="openEditModal(item)" title="Edit">
+                  <span class="material-icons-round" style="font-size: 18px;">edit</span>
+                </button>
+                <button class="btn-icon text-red" (click)="deleteItem(item.id)" title="Delete">
+                  <span class="material-icons-round" style="font-size: 18px;">delete</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <ng-template #emptyState>
+          <div class="empty-state">
+            <span class="material-icons-round">cloud_off</span>
+            <p>No {{ activeTab | lowercase }} found. Create the first one!</p>
+          </div>
+        </ng-template>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Dynamic Modal -->
+  <div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>{{ modalMode }} {{ activeTab | slice:0:-1 }}</h3>
+        <button class="btn-icon" (click)="closeModal()" style="margin:0; padding:4px">
+          <span class="material-icons-round">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Conditional Name Fields based on Entity -->
+        <div class="form-group" *ngIf="activeTab === 'Products'">
+          <label>Product Name</label>
+          <input type="text" class="form-control" [(ngModel)]="formData.name" placeholder="Enter product name">
+        </div>
+        
+        <div class="form-group" *ngIf="activeTab === 'Warehouses'">
+          <label>Facility Name</label>
+          <input type="text" class="form-control" [(ngModel)]="formData.facilityName" placeholder="Enter facility name">
+        </div>
+        
+        <div class="form-group" *ngIf="activeTab === 'Suppliers'">
+          <label>Company Name</label>
+          <input type="text" class="form-control" [(ngModel)]="formData.companyName" placeholder="Enter company name">
+        </div>
+
+        <div class="form-group" *ngIf="activeTab === 'Products'">
+          <label>Description</label>
+          <input type="text" class="form-control" [(ngModel)]="formData.description" placeholder="Enter description">
+          <br><br>
+          <label>Price</label>
+          <input type="number" class="form-control" [(ngModel)]="formData.price" placeholder="Enter price">
+          <br><br>
+          <label>Supplier ID</label>
+          <input type="number" class="form-control" [(ngModel)]="formData.supplierId" placeholder="Enter supplier ID">
+        </div>
+
+        <div class="form-group" *ngIf="activeTab === 'Warehouses' || activeTab === 'Suppliers'">
+          <label>Contact Person</label>
+          <input type="text" class="form-control" [(ngModel)]="formData.contactPerson" placeholder="Contact Name">
+          <br><br>
+          <label>Contact Email</label>
+          <input type="email" class="form-control" [(ngModel)]="formData.contactEmail" placeholder="Email">
+          <br><br>
+          <label>Phone</label>
+          <input type="text" class="form-control" [(ngModel)]="formData.phone" placeholder="Phone">
+        </div>
+
+        <div class="form-group" *ngIf="activeTab === 'Orders'">
+          <label>Order Number</label>
+          <input type="text" class="form-control" [(ngModel)]="formData.orderNumber" placeholder="Order No">
+          <br><br>
+          <label>Customer Name</label>
+          <input type="text" class="form-control" [(ngModel)]="formData.customerName" placeholder="Customer Name">
+          <br><br>
+          <label>Shipping Address</label>
+          <input type="text" class="form-control" [(ngModel)]="formData.shippingAddress" placeholder="Address">
+          <br><br>
+          <label>Status</label>
+          <input type="text" class="form-control" [(ngModel)]="formData.status" placeholder="Status">
+          <br><br>
+          <label>Total Amount</label>
+          <input type="number" class="form-control" [(ngModel)]="formData.totalAmount" placeholder="Amount">
+        </div>
+
+        <div class="form-group" *ngIf="activeTab === 'OrderItems'">
+          <label>Order ID</label>
+          <input type="number" class="form-control" [(ngModel)]="formData.orderId" placeholder="Order ID">
+          <br><br>
+          <label>Product ID</label>
+          <input type="number" class="form-control" [(ngModel)]="formData.productId" placeholder="Product ID">
+          <br><br>
+          <label>Quantity</label>
+          <input type="number" class="form-control" [(ngModel)]="formData.quantity" placeholder="Quantity">
+          <br><br>
+          <label>Price</label>
+          <input type="number" class="form-control" [(ngModel)]="formData.price" placeholder="Price">
+        </div>
+
+        <div class="form-group" *ngIf="activeTab === 'Inventories'">
+          <label>Quantity</label>
+          <input type="number" class="form-control" [(ngModel)]="formData.quantity" placeholder="Quantity">
+          <br><br>
+          <label>Product ID</label>
+          <input type="number" class="form-control" [(ngModel)]="formData.productId" placeholder="Product ID">
+          <br><br>
+          <label>Warehouse ID</label>
+          <input type="number" class="form-control" [(ngModel)]="formData.warehouseId" placeholder="Warehouse ID">
+          <br><br>
+          <label>Minimum Threshold</label>
+          <input type="number" class="form-control" [(ngModel)]="formData.minimumThreshold" placeholder="Min Threshold">
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn-danger" (click)="closeModal()" style="background:transparent">Cancel</button>
+        <button class="btn-primary" (click)="saveItem()">{{ modalMode === 'Create' ? 'Create' : 'Save Changes' }}</button>
+      </div>
+    </div>
+  </div>
+</div>
